@@ -45,7 +45,7 @@ public class LevelGenerator : MonoBehaviour
                 bigLevelMap[i + rows - 1, j + cols] = levelMap[rows - 1 - i, cols - 1 - j];
             }
         }
-        mainCamera.orthographicSize = Mathf.Max(bigLevelMap.GetLength(1) /2f/mainCamera.aspect, bigLevelMap.GetLength(0) / 2f);
+        mainCamera.orthographicSize = Mathf.Max(bigLevelMap.GetLength(1) /2f/mainCamera.aspect, bigLevelMap.GetLength(0) / 2f)*1.1f;
 
         // Generate level on bigmap
         for (int i = 0; i < bigLevelMap.GetLength(0); i++)
