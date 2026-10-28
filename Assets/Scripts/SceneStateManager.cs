@@ -14,7 +14,7 @@ public class SceneStateManager : MonoBehaviour
 {
     public static SceneStateManager Instance { get; private set; }
 
-    public SceneState CurrentState { get; private set; } = SceneState.Normal;
+    public SceneState CurrentState { get; private set; } = SceneState.Intro;
 
     // Event that other scripts can listen to
     public event Action<SceneState> OnSceneStateChanged;
