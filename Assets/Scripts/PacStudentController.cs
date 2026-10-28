@@ -19,6 +19,11 @@ public class PacStudentController : MonoBehaviour
 
     private Vector3Int currentGridPosition;
 
+    [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource footstepAudioSource;
+
+    [SerializeField] private ParticleSystem particleSystem;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -42,8 +47,7 @@ public class PacStudentController : MonoBehaviour
             return false;
         }
         string tileType = tileMap.GetTile(gridPosition).name;
-        Debug.Log($"Tile at {gridPosition} is of type: {tileType}");
-        if (tileType == "Spritesheet_0" || tileType == "Spritesheet_1" || tileType == "Spritesheet_2" || tileType == "Spritesheet_19" || tileType == "Spritesheet_20"|| tileType == "Spritesheet_21")
+        if (tileType == "Spritesheet_0" || tileType == "Spritesheet_1" || tileType == "Spritesheet_2" || tileType == "Spritesheet_19" || tileType == "Spritesheet_20"|| tileType == "Spritesheet_20")
         {
             return false;
         }
@@ -52,6 +56,7 @@ public class PacStudentController : MonoBehaviour
 
     private bool AttemptMove(Vector2Int direction)
     {
+        
         if (direction == Vector2Int.zero)
         {
             return false;
@@ -59,6 +64,7 @@ public class PacStudentController : MonoBehaviour
         Vector3Int newGridPosition = currentGridPosition + new Vector3Int(direction.x, direction.y, 0);
         if (!IsWalkable(newGridPosition))
         {
+            UpdateAnimationAndAudio(Vector2Int.zero);
             return false;
         }
         currentInput = direction;
@@ -66,7 +72,32 @@ public class PacStudentController : MonoBehaviour
         targetPosition = tileMap.GetCellCenterWorld(newGridPosition);
         lerpTime = 0f;
         isLerping = true;
+        UpdateAnimationAndAudio(direction);
         return true;
+    }
+
+    private void UpdateAnimationAndAudio(Vector2Int direction)
+    {
+        if (direction == Vector2Int.zero)
+        {
+            animator.SetFloat("MoveX", 0);
+            animator.SetFloat("MoveY", 0);
+            footstepAudioSource.Stop();
+            particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            return;
+        }
+
+        animator.SetFloat("MoveX", direction.x);
+        animator.SetFloat("MoveY", direction.y);
+        if (!footstepAudioSource.isPlaying)
+        {
+            footstepAudioSource.Play();
+            if (!particleSystem.isPlaying)
+            {
+                particleSystem.Play();
+                Debug.Log("Particle system started.");
+            }
+        }
     }
 
     private void MoveTowardsTarget()
