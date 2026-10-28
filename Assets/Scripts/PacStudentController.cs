@@ -24,6 +24,15 @@ public class PacStudentController : MonoBehaviour
 
     [SerializeField] private ParticleSystem particleSystem;
 
+    [SerializeField] private GameObject scoreControllerObject;
+    [SerializeField] private AudioClip budCollectSound;
+    [SerializeField] private AudioClip wallHitSound;
+    [SerializeField] private AudioSource oneShotAudioSource;
+
+    [SerializeField] private GameObject teleporter1;
+    [SerializeField] private GameObject teleporter2;
+
+    [SerializeField] private TileBase grassTile;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -49,6 +58,8 @@ public class PacStudentController : MonoBehaviour
         string tileType = tileMap.GetTile(gridPosition).name;
         if (tileType == "Spritesheet_0" || tileType == "Spritesheet_1" || tileType == "Spritesheet_2" || tileType == "Spritesheet_19" || tileType == "Spritesheet_20"|| tileType == "Spritesheet_20")
         {
+            //Play audio for hitting a wall
+            footstepAudioSource.PlayOneShot(wallHitSound);
             return false;
         }
         return true;
@@ -95,7 +106,6 @@ public class PacStudentController : MonoBehaviour
             if (!particleSystem.isPlaying)
             {
                 particleSystem.Play();
-                Debug.Log("Particle system started.");
             }
         }
     }
@@ -111,6 +121,37 @@ public class PacStudentController : MonoBehaviour
             isLerping = false;
             currentGridPosition += new Vector3Int(currentInput.x, currentInput.y, 0);
             transform.position = tileMap.GetCellCenterWorld(currentGridPosition);
+            // Check for teleporters
+            if (currentGridPosition == tileMap.WorldToCell(teleporter1.transform.position))
+            {
+                currentGridPosition = tileMap.WorldToCell(teleporter2.transform.position);
+                transform.position = tileMap.GetCellCenterWorld(currentGridPosition);
+            }
+            else if (currentGridPosition == tileMap.WorldToCell(teleporter2.transform.position))
+            {
+                currentGridPosition = tileMap.WorldToCell(teleporter1.transform.position);
+                transform.position = tileMap.GetCellCenterWorld(currentGridPosition);
+            }
+
+            // Check the tile type at the new pos and replace/ add score if needed
+            string tileType = tileMap.GetTile(currentGridPosition).name;
+
+
+            // Tile is a uneaten pellet, replac and add score 39->59
+
+            if (tileType == "Spritesheet_39")
+            {
+                tileMap.SetTile(currentGridPosition, grassTile);
+                scoreControllerObject.GetComponent<ScoreController>().UpdateScore(10);
+            }
+
+            if (tileType == "New Animated Tile")
+            {
+                tileMap.SetTile(currentGridPosition, grassTile);
+                scoreControllerObject.GetComponent<ScoreController>().UpdateScore(50);
+
+                // Go into powerup mode for 10 seconds
+            }
         }
     }
 
@@ -147,5 +188,15 @@ public class PacStudentController : MonoBehaviour
             return;
         }
         AttemptMove(currentInput);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Bud"))
+        {
+            oneShotAudioSource.PlayOneShot(budCollectSound);
+            scoreControllerObject.GetComponent<ScoreController>().UpdateScore(100);
+            Destroy(other.gameObject);
+        }
     }
 }
