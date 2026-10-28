@@ -653,6 +653,7 @@ GameObject:
   - component: {fileID: 153328788}
   - component: {fileID: 153328787}
   - component: {fileID: 153328786}
+  - component: {fileID: 153328789}
   m_Layer: 5
   m_Name: Level1Button
   m_TagString: Untagged
@@ -778,6 +779,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 153328784}
   m_CullTransparentMesh: 1
+--- !u!114 &153328789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 153328784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d3fd612d473ad04e80309933e783eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  timeText1: {fileID: 1167831754}
+  scoreText1: {fileID: 1868189299}
+  timeText2: {fileID: 1679797705}
+  scoreText2: {fileID: 141961460}
 --- !u!1 &178400674
 GameObject:
   m_ObjectHideFlags: 0

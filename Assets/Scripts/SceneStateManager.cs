@@ -7,6 +7,7 @@ public enum SceneState
     Normal,
     Scared,
     ScaredEnding,
+    TemporaryDeath,
     GameOver
 }
 
@@ -18,6 +19,7 @@ public class SceneStateManager : MonoBehaviour
 
     // Event that other scripts can listen to
     public event Action<SceneState> OnSceneStateChanged;
+    public event Action ResetGhostChanged;
 
     private void Awake()
     {
@@ -39,5 +41,9 @@ public class SceneStateManager : MonoBehaviour
 
         // Notify all subscribed listeners
         OnSceneStateChanged?.Invoke(CurrentState);
+    }
+
+    public void ResetGhosts(){
+        ResetGhostChanged?.Invoke();
     }
 }
