@@ -24,14 +24,19 @@ public class CherryController : MonoBehaviour
         {
             yield return new WaitForSeconds(spawnInterval);
 
-            currentCherry = SpawnCherry();
+            GameObject cherry = SpawnCherry();
+            currentCherry = cherry;
 
-            if (currentCherry != null)
-            {
-                yield return MoveCherry(currentCherry);
-                Destroy(currentCherry);
+            if (cherry == null)
+                continue;
+
+            yield return MoveCherry(cherry);
+
+            if (cherry != null)
+                Destroy(cherry);
+
+            if (currentCherry == cherry)
                 currentCherry = null;
-            }
         }
     }
 
@@ -41,42 +46,61 @@ public class CherryController : MonoBehaviour
         Vector2 center = bounds.center;
 
         float angle = Random.Range(0f, 360f);
+
         Vector2 direction = new Vector2(
             Mathf.Cos(angle * Mathf.Deg2Rad),
             Mathf.Sin(angle * Mathf.Deg2Rad)
         ).normalized;
 
-        float levelDistance = DistanceToRectangleEdge(
-            center, direction, bounds);
+        float levelDistance = DistanceToRectangleEdge(center, direction, bounds);
 
-        Vector2 spawnPosition =
-            center + direction * (levelDistance + spawnPadding);
+        Vector2 spawnPosition = center + direction * (levelDistance + spawnPadding);
 
         Bounds cameraBounds = GetCameraBounds();
 
-        float cameraDistance = DistanceToRectangleEdge(
-            center, -direction, cameraBounds);
+        float cameraDistance = DistanceToRectangleEdge(center, -direction, cameraBounds);
 
-        Vector2 targetPosition =
-            center - direction * (cameraDistance + spawnPadding);
+        Vector2 targetPosition = center - direction * (cameraDistance + spawnPadding);
 
-        GameObject cherry = Instantiate(
-            cherryPrefab, spawnPosition, Quaternion.identity);
+        GameObject cherry = Instantiate(cherryPrefab, spawnPosition, Quaternion.identity);
 
-        CherryPath path = cherry.AddComponent<CherryPath>();
-        path.Initialize(spawnPosition, targetPosition, moveDuration);
+        cherry.GetComponent<BudMarker>()?.Initialize(spawnPosition, targetPosition, moveDuration);
 
         return cherry;
     }
 
     private IEnumerator MoveCherry(GameObject cherry)
     {
-        CherryPath path = cherry.GetComponent<CherryPath>();
+        if (cherry == null)
+            yield break;
 
-        if (path != null)
+        BudMarker marker = cherry.GetComponent<BudMarker>();
+
+        if (marker == null)
+            yield break;
+
+        Vector2 start = marker.startPosition;
+        Vector2 target = marker.targetPosition;
+        float duration = marker.duration;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
         {
-            yield return path.Move();
+            if (cherry == null)
+                yield break;
+
+            elapsedTime += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsedTime / duration);
+
+            cherry.transform.position = Vector2.Lerp(start, target, t);
+
+            yield return null;
         }
+
+        if (cherry != null)
+            cherry.transform.position = target;
     }
 
     private Bounds GetCameraBounds()
@@ -111,39 +135,5 @@ public class CherryController : MonoBehaviour
             distanceY = (bounds.min.y - point.y) / direction.y;
 
         return Mathf.Min(Mathf.Abs(distanceX), Mathf.Abs(distanceY));
-    }
-}
-
-public class CherryPath : MonoBehaviour
-{
-    private Vector2 startPosition;
-    private Vector2 targetPosition;
-    private float duration;
-
-    public void Initialize(
-        Vector2 start, Vector2 target, float moveDuration)
-    {
-        startPosition = start;
-        targetPosition = target;
-        duration = Mathf.Max(0.01f, moveDuration);
-    }
-
-    public IEnumerator Move()
-    {
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.deltaTime;
-
-            float t = Mathf.Clamp01(elapsedTime / duration);
-
-            transform.position = Vector2.Lerp(
-                startPosition, targetPosition, t);
-
-            yield return null;
-        }
-
-        transform.position = targetPosition;
     }
 }
